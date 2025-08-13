@@ -9,4 +9,5 @@ export default () => ({
     schema: process.env.DB_SCHEMA || 'public',
   },
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  graphqlSchema: process.env.GRAPHQL_SCHEMA,
 })
