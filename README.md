@@ -1,4 +1,4 @@
-# Project Management API
+# Obra Manager API
 
 A backend API built with **NestJS**, **GraphQL**, and **PostgreSQL** for managing projects, statuses, and related data.
 
