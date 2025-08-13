@@ -8,6 +8,7 @@ import { typeOrmConfig } from './config/typeorm.config'
 import { graphqlConfig } from './config/graphql.config'
 
 import { ProjectsModule } from './projects/projects.module'
+import { UsersModule } from './users/users.module'
 import appConfig from './config/app.config'
 @Module({
   imports: [
@@ -24,11 +25,15 @@ import appConfig from './config/app.config'
     // GraphQL
     GraphQLModule.forRootAsync({
       driver: ApolloDriver,
-      useFactory: graphqlConfig,
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) =>
+        graphqlConfig(configService),
     }),
 
     // Módulos de negocio
     ProjectsModule,
+
+    UsersModule,
   ],
 })
 export class AppModule {}

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Project } from './entities/project.entity'
+import { ProjectsPagination } from './dto/project-pagination.type'
 
 @Injectable()
 export class ProjectsService {
@@ -10,7 +11,23 @@ export class ProjectsService {
     private projectsRepo: Repository<Project>,
   ) {}
 
-  findAll(): Promise<Project[]> {
-    return this.projectsRepo.find()
+  async findAll(
+    userId: string,
+    page: number,
+    limit: number,
+  ): Promise<ProjectsPagination> {
+    const [data, total] = await this.projectsRepo.findAndCount({
+      where: { user: { id: userId } },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { created_at: 'DESC' },
+    })
+
+    return {
+      data,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    }
   }
 }
