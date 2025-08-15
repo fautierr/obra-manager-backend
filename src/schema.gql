@@ -31,4 +31,14 @@ type ProjectsPagination {
 type Query {
   projects(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
   users: [User!]!
+  user(id: String!): User!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
 }
