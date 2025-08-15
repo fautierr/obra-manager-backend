@@ -33,11 +33,18 @@ type Category {
   name: String!
 }
 
+type ProjectStatus {
+  id: Int!
+  name: String!
+  description: String!
+}
+
 type Query {
-  projectsByUser(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
+  findProjectsByUserId(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
   findAllUsers: [User!]!
   findUserById(id: String!): User!
   findAllCategories: [Category!]!
+  findAllProjectStatuses: [ProjectStatus!]!
 }
 
 type Mutation {
