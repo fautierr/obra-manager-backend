@@ -39,12 +39,19 @@ type ProjectStatus {
   description: String!
 }
 
+type Unit {
+  id: Int!
+  name: String!
+  abbreviation: String!
+}
+
 type Query {
   findProjectsByUserId(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
   findAllUsers: [User!]!
   findUserById(id: String!): User!
   findAllCategories: [Category!]!
   findAllProjectStatuses: [ProjectStatus!]!
+  findAllUnits: [Unit!]!
 }
 
 type Mutation {
