@@ -45,6 +45,14 @@ type Unit {
   abbreviation: String!
 }
 
+type Material {
+  id: Int!
+  name: String!
+  unit: Unit!
+  description: String
+  created_at: DateTime
+}
+
 type Query {
   findProjectsByUserId(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
   findAllUsers: [User!]!
@@ -52,6 +60,7 @@ type Query {
   findAllCategories: [Category!]!
   findAllProjectStatuses: [ProjectStatus!]!
   findAllUnits: [Unit!]!
+  findAllMaterials: [Material!]!
 }
 
 type Mutation {
