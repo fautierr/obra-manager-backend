@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { GqlExceptionFilter } from './utils/filters/graphql-exception.filter'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -19,7 +20,7 @@ async function bootstrap() {
       transform: true,
     }),
   )
-
+  app.useGlobalFilters(new GqlExceptionFilter())
   await app.listen(configService.get<number>('port') || 4000)
 }
 void bootstrap()
