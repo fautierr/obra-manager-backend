@@ -6,7 +6,7 @@ import { ProjectsPagination } from './dto/project-pagination.type'
 export class ProjectsResolver {
   constructor(private readonly projectsService: ProjectsService) {}
 
-  @Query(() => ProjectsPagination, { name: 'projects' })
+  @Query(() => ProjectsPagination, { name: 'projectsByUser' })
   findAll(
     @Args('userId', { type: () => String }) userId: string,
     @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
