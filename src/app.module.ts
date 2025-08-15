@@ -11,6 +11,7 @@ import { ProjectsModule } from './projects/projects.module'
 import { UsersModule } from './users/users.module'
 import { CategoriesModule } from './categories/categories.module'
 import { ProjectStatusesModule } from './project-statuses/project-statuses.module'
+import { UnitsModule } from './units/units.module'
 import appConfig from './config/app.config'
 @Module({
   imports: [
@@ -40,6 +41,8 @@ import appConfig from './config/app.config'
     CategoriesModule,
 
     ProjectStatusesModule,
+
+    UnitsModule,
   ],
 })
 export class AppModule {}
