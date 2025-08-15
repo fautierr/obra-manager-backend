@@ -28,10 +28,16 @@ type ProjectsPagination {
   lastPage: Int!
 }
 
+type Category {
+  id: Int!
+  name: String!
+}
+
 type Query {
-  projects(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
-  users: [User!]!
-  user(id: String!): User!
+  projectsByUser(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
+  findAllUsers: [User!]!
+  findUserById(id: String!): User!
+  findAllCategories: [Category!]!
 }
 
 type Mutation {

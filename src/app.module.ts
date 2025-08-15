@@ -9,6 +9,7 @@ import { graphqlConfig } from './config/graphql.config'
 
 import { ProjectsModule } from './projects/projects.module'
 import { UsersModule } from './users/users.module'
+import { CategoriesModule } from './categories/categories.module'
 import appConfig from './config/app.config'
 @Module({
   imports: [
@@ -34,6 +35,8 @@ import appConfig from './config/app.config'
     ProjectsModule,
 
     UsersModule,
+
+    CategoriesModule,
   ],
 })
 export class AppModule {}
