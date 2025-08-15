@@ -10,7 +10,9 @@ export class CategoriesService {
     private categoriesRepo: Repository<Category>,
   ) {}
   async findAll(): Promise<Category[]> {
-    const categories = await this.categoriesRepo.find()
+    const categories = await this.categoriesRepo.find({
+      order: { id: 'ASC' },
+    })
     return categories
   }
 }
