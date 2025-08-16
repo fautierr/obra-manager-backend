@@ -22,8 +22,9 @@ export class UsersService {
     return user
   }
 
-  create(input: CreateUserInput): Promise<User> {
-    const user = this.usersRepo.create(input)
-    return this.usersRepo.save(user)
+  async create(input: CreateUserInput): Promise<User> {
+    const createUser = this.usersRepo.create(input)
+    const user = await this.usersRepo.save(createUser)
+    return user
   }
 }
