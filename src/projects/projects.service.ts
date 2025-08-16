@@ -6,6 +6,7 @@ import { ProjectsPagination } from './dto/project-pagination.type'
 import { CreateProjectInput } from './dto/create-project.input'
 import { User } from 'src/users/entities/user.entity'
 import { ProjectStatus } from 'src/project-statuses/entities/project-status.entity'
+import { UpdateProjectInput } from './dto/update-project.input'
 
 @Injectable()
 export class ProjectsService {
@@ -24,7 +25,7 @@ export class ProjectsService {
     limit: number,
   ): Promise<ProjectsPagination> {
     const [data, total] = await this.projectsRepo.findAndCount({
-      where: { user: { id: userId } },
+      where: { user: { id: userId }, is_deleted: false },
       skip: (page - 1) * limit,
       take: limit,
       order: { created_at: 'DESC' },
@@ -39,13 +40,20 @@ export class ProjectsService {
       lastPage: Math.ceil(total / limit),
     }
   }
+  async findById(id: string): Promise<Project> {
+    const project = await this.projectsRepo.findOne({
+      where: { id, is_deleted: false },
+    })
 
+    if (!project) {
+      throw new NotFoundException(`Project ${id} not found`)
+    }
+
+    return project
+  }
   async create(input: CreateProjectInput): Promise<Project> {
-    // Traer el usuario desde la DB
     const user = await this.usersRepo.findOne({ where: { id: input.userId } })
     if (!user) throw new NotFoundException(`User ${input.userId} not found`)
-
-    // Traer el status si se pasó statusId
 
     const status = await this.projectStatusRepo.findOne({
       where: { id: input.statusId },
@@ -53,7 +61,6 @@ export class ProjectsService {
     if (!status)
       throw new NotFoundException(`ProjectStatus ${input.statusId} not found`)
 
-    // Crear proyecto con relaciones completas
     const project = this.projectsRepo.create({
       name: input.name,
       description: input.description,
@@ -62,5 +69,33 @@ export class ProjectsService {
     })
 
     return await this.projectsRepo.save(project)
+  }
+  async update(id: string, input: UpdateProjectInput): Promise<Project> {
+    const project = await this.projectsRepo.findOne({ where: { id } })
+    if (!project) throw new NotFoundException(`Project ${id} not found`)
+
+    if (input.statusId) {
+      const status = await this.projectStatusRepo.findOne({
+        where: { id: input.statusId },
+      })
+      if (!status)
+        throw new NotFoundException(`ProjectStatus ${input.statusId} not found`)
+      project.status = status
+    }
+
+    if (input.name !== undefined) project.name = input.name
+    if (input.description !== undefined) project.description = input.description
+
+    return await this.projectsRepo.save(project)
+  }
+  async remove(projectId: string): Promise<Project> {
+    const project = await this.projectsRepo.findOne({
+      where: { id: projectId },
+    })
+    if (!project) throw new NotFoundException(`Project ${projectId} not found`)
+
+    project.is_deleted = true
+
+    return this.projectsRepo.save(project)
   }
 }
