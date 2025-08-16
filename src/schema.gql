@@ -2,6 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ProjectStatus {
+  id: Int!
+  name: String!
+  description: String!
+}
+
 type User {
   id: ID!
   name: String!
@@ -19,6 +25,8 @@ type Project {
   name: String!
   description: String
   created_at: DateTime!
+  user: User!
+  status: ProjectStatus!
 }
 
 type ProjectsPagination {
@@ -31,12 +39,6 @@ type ProjectsPagination {
 type Category {
   id: Int!
   name: String!
-}
-
-type ProjectStatus {
-  id: Int!
-  name: String!
-  description: String!
 }
 
 type Unit {
@@ -64,7 +66,15 @@ type Query {
 }
 
 type Mutation {
+  createProject(input: CreateProjectInput!): Project!
   createUser(input: CreateUserInput!): User!
+}
+
+input CreateProjectInput {
+  userId: ID!
+  name: String!
+  description: String
+  statusId: Int
 }
 
 input CreateUserInput {

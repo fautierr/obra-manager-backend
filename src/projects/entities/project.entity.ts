@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql'
+import { ProjectStatus } from 'src/project-statuses/entities/project-status.entity'
 import { User } from 'src/users/entities/user.entity'
 import {
   Entity,
@@ -30,7 +31,13 @@ export class Project {
   })
   created_at: Date
 
-  @ManyToOne(() => User, (user) => user.projects)
+  @Field(() => User)
+  @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User
+
+  @Field(() => ProjectStatus)
+  @ManyToOne(() => ProjectStatus, { eager: true, nullable: true })
+  @JoinColumn({ name: 'status_id' })
+  status?: ProjectStatus
 }
