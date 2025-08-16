@@ -1,8 +1,20 @@
-import { CreateProjectInput } from './create-project.input'
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql'
+import { InputType, Field, Int } from '@nestjs/graphql'
+import { IsOptional, IsString, IsInt } from 'class-validator'
 
 @InputType()
-export class UpdateProjectInput extends PartialType(CreateProjectInput) {
-  @Field(() => Int)
-  id: number
+export class UpdateProjectInput {
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  name?: string
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  description?: string
+
+  @Field(() => Int, { nullable: true })
+  @IsInt()
+  @IsOptional()
+  statusId?: number
 }

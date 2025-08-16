@@ -27,6 +27,8 @@ type Project {
   created_at: DateTime!
   user: User!
   status: ProjectStatus!
+  updated_at: DateTime!
+  is_deleted: Boolean!
 }
 
 type ProjectsPagination {
@@ -57,8 +59,9 @@ type Material {
 
 type Query {
   findProjectsByUserId(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
+  findProjectById(projectId: String!): Project!
   findAllUsers: [User!]!
-  findUserById(id: String!): User!
+  findUserById(userId: String!): User!
   findAllCategories: [Category!]!
   findAllProjectStatuses: [ProjectStatus!]!
   findAllUnits: [Unit!]!
@@ -67,12 +70,20 @@ type Query {
 
 type Mutation {
   createProject(input: CreateProjectInput!): Project!
+  updateProject(projectId: String!, input: UpdateProjectInput!): Project!
+  deleteProject(projectId: String!): Project!
   createUser(input: CreateUserInput!): User!
 }
 
 input CreateProjectInput {
   userId: ID!
   name: String!
+  description: String
+  statusId: Int
+}
+
+input UpdateProjectInput {
+  name: String
   description: String
   statusId: Int
 }

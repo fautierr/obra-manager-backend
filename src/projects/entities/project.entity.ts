@@ -40,4 +40,17 @@ export class Project {
   @ManyToOne(() => ProjectStatus, { eager: true, nullable: true })
   @JoinColumn({ name: 'status_id' })
   status?: ProjectStatus
+
+  @Field()
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date
+
+  @Column({ default: false })
+  @Field(() => Boolean)
+  is_deleted: boolean
 }
