@@ -66,6 +66,32 @@ type ProjectMaterial {
   createdAt: DateTime!
 }
 
+type MaterialBreakdown {
+  materialId: ID!
+  materialName: String!
+  quantity: Float!
+  totalCost: Float!
+  percentageOfProject: Float!
+}
+
+type ProjectComparison {
+  project1Id: ID!
+  project1Total: Float!
+  project2Id: ID!
+  project2Total: Float!
+  difference: Float!
+  differencePercentage: Float!
+  higherProjectId: ID!
+  project1Materials: [MaterialBreakdown!]!
+  project2Materials: [MaterialBreakdown!]!
+}
+
+type ProjectTotals {
+  projectId: ID!
+  totalCost: Float!
+  materials: [MaterialBreakdown!]!
+}
+
 type Query {
   findProjectsByUserId(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
   findProjectById(projectId: String!): Project!
@@ -77,6 +103,8 @@ type Query {
   findAllMaterials: [Material!]!
   findMaterialById(materialId: Float!): Material!
   findMaterialsByProjectId(projectId: String!): [ProjectMaterial!]!
+  findProjectTotals(projectId: String!): ProjectTotals!
+  findProjectComparison(project1Id: String!, project2Id: String!): ProjectComparison!
 }
 
 type Mutation {
