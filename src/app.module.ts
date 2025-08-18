@@ -13,6 +13,7 @@ import { CategoriesModule } from './categories/categories.module'
 import { ProjectStatusesModule } from './project-statuses/project-statuses.module'
 import { UnitsModule } from './units/units.module'
 import { MaterialsModule } from './materials/materials.module'
+import { ProjectMaterialsModule } from './project-materials/project-materials.module'
 import appConfig from './config/app.config'
 @Module({
   imports: [
@@ -46,6 +47,8 @@ import appConfig from './config/app.config'
     UnitsModule,
 
     MaterialsModule,
+
+    ProjectMaterialsModule,
   ],
 })
 export class AppModule {}
