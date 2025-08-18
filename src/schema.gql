@@ -57,6 +57,15 @@ type Material {
   created_at: DateTime
 }
 
+type ProjectMaterial {
+  id: ID!
+  project: Project!
+  material: Material!
+  quantity: Float!
+  unit_price: Float
+  createdAt: DateTime!
+}
+
 type Query {
   findProjectsByUserId(userId: String!, page: Int! = 1, limit: Int! = 5): ProjectsPagination!
   findProjectById(projectId: String!): Project!
@@ -66,6 +75,8 @@ type Query {
   findAllProjectStatuses: [ProjectStatus!]!
   findAllUnits: [Unit!]!
   findAllMaterials: [Material!]!
+  findMaterialById(materialId: Float!): Material!
+  findMaterialsByProjectId(projectId: String!): [ProjectMaterial!]!
 }
 
 type Mutation {
@@ -73,6 +84,9 @@ type Mutation {
   updateProject(projectId: String!, input: UpdateProjectInput!): Project!
   deleteProject(projectId: String!): Project!
   createUser(input: CreateUserInput!): User!
+  createProjectMaterial(input: CreateProjectMaterialInput!): ProjectMaterial!
+  updateProjectMaterial(input: UpdateProjectMaterialInput!): ProjectMaterial!
+  deleteProjectMaterial(projectMaterialId: Int!): Boolean!
 }
 
 input CreateProjectInput {
@@ -91,4 +105,19 @@ input UpdateProjectInput {
 input CreateUserInput {
   name: String!
   email: String!
+}
+
+input CreateProjectMaterialInput {
+  projectId: ID!
+  materialId: Int!
+  quantity: Float!
+  unitPrice: Float
+}
+
+input UpdateProjectMaterialInput {
+  projectId: ID
+  materialId: Int
+  quantity: Float
+  unitPrice: Float
+  id: Int!
 }
