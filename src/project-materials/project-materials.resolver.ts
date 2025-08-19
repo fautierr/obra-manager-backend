@@ -2,7 +2,7 @@ import { Resolver, Query, Args, Mutation, Int } from '@nestjs/graphql'
 import { ProjectMaterialsService } from './project-materials.service'
 import { ProjectMaterial } from './entities/project-material.entity'
 import { CreateProjectMaterialInput } from './dto/create-project-material.input'
-import { UpdateProjectMaterialInput } from './dto/update-project-material.input'
+import { UpdateManyProjectMaterialsInput } from './dto/update-project-material.input'
 
 @Resolver(() => ProjectMaterial)
 export class ProjectMaterialsResolver {
@@ -17,16 +17,16 @@ export class ProjectMaterialsResolver {
     return projectMaterials
   }
 
-  @Mutation(() => ProjectMaterial, { name: 'createProjectMaterial' })
+  @Mutation(() => [ProjectMaterial], { name: 'createProjectMaterials' })
   create(@Args('input') input: CreateProjectMaterialInput) {
-    return this.projectMaterialsService.create(input)
+    return this.projectMaterialsService.createMany(input)
   }
 
-  @Mutation(() => ProjectMaterial, { name: 'updateProjectMaterial' })
-  async update(
-    @Args('input') input: UpdateProjectMaterialInput,
-  ): Promise<ProjectMaterial> {
-    return this.projectMaterialsService.update(input)
+  @Mutation(() => [ProjectMaterial], { name: 'updateProjectMaterials' })
+  async updateMany(
+    @Args('input') input: UpdateManyProjectMaterialsInput,
+  ): Promise<ProjectMaterial[]> {
+    return this.projectMaterialsService.updateMany(input.materials)
   }
 
   @Mutation(() => Boolean, { name: 'deleteProjectMaterial' })

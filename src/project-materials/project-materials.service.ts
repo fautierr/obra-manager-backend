@@ -28,46 +28,66 @@ export class ProjectMaterialsService {
     return projectMaterials
   }
 
-  async create(input: CreateProjectMaterialInput): Promise<ProjectMaterial> {
+  async createMany(
+    input: CreateProjectMaterialInput,
+  ): Promise<ProjectMaterial[]> {
     const project = await this.projectsRepo.findOne({
       where: { id: input.projectId },
     })
-    if (!project)
-      throw new NotFoundException(
-        `Project material ${input.projectId} not found`,
-      )
-    const material = await this.materialsRepo.findOne({
-      where: { id: input.materialId },
-    })
-    if (!material)
-      throw new NotFoundException(`Material ${input.materialId} not found`)
-    const projectMaterial = this.projectMaterialsRepo.create({
-      project: project, // la entidad completa
-      material,
-      quantity: input.quantity,
-      unit_price: input.unitPrice, // camelCase
-    })
-
-    return await this.projectMaterialsRepo.save(projectMaterial)
-  }
-
-  async update(input: UpdateProjectMaterialInput): Promise<ProjectMaterial> {
-    const projectMaterial = await this.projectMaterialsRepo.findOne({
-      where: { id: input.id },
-      relations: ['material', 'project'],
-    })
-
-    if (!projectMaterial) {
-      throw new NotFoundException(`ProjectMaterial ${input.id} not found`)
+    if (!project) {
+      throw new NotFoundException(`Project ${input.projectId} not found`)
     }
 
-    // merge solo las propiedades que se envíen
-    Object.assign(projectMaterial, {
-      quantity: input.quantity ?? projectMaterial.quantity,
-      unit_price: input.unitPrice ?? projectMaterial.unit_price,
-    })
+    const materialsToSave: ProjectMaterial[] = []
 
-    return await this.projectMaterialsRepo.save(projectMaterial)
+    for (const m of input.materials) {
+      const material = await this.materialsRepo.findOne({
+        where: { id: m.materialId },
+      })
+      if (!material) {
+        throw new NotFoundException(`Material ${m.materialId} not found`)
+      }
+
+      const projectMaterial = this.projectMaterialsRepo.create({
+        project,
+        material,
+        quantity: m.quantity,
+        unit_price: m.unitPrice ?? 0,
+      })
+      materialsToSave.push(projectMaterial)
+    }
+
+    return await this.projectMaterialsRepo.save(materialsToSave)
+  }
+
+  async updateMany(
+    inputs: UpdateProjectMaterialInput[],
+  ): Promise<ProjectMaterial[]> {
+    const updatedMaterials: ProjectMaterial[] = []
+
+    for (const input of inputs) {
+      const projectMaterial = await this.projectMaterialsRepo.findOne({
+        where: { id: input.id },
+        relations: ['material', 'project'],
+      })
+
+      if (!projectMaterial) {
+        throw new NotFoundException(`ProjectMaterial ${input.id} not found`)
+      }
+
+      if (input.quantity !== undefined) {
+        projectMaterial.quantity = input.quantity
+      }
+
+      if (input.unitPrice !== undefined) {
+        projectMaterial.unit_price = input.unitPrice
+      }
+
+      const saved = await this.projectMaterialsRepo.save(projectMaterial)
+      updatedMaterials.push(saved)
+    }
+
+    return updatedMaterials
   }
 
   async remove(id: number): Promise<boolean> {

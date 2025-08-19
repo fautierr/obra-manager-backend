@@ -1,13 +1,22 @@
-import { IsInt, IsNotEmpty } from 'class-validator'
-import { CreateProjectMaterialInput } from './create-project-material.input'
+import { IsInt, IsNotEmpty, ValidateNested } from 'class-validator'
+import { CreateProjectMaterialItemInput } from './create-project-material.input'
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql'
+import { Type } from 'class-transformer'
 
 @InputType()
 export class UpdateProjectMaterialInput extends PartialType(
-  CreateProjectMaterialInput,
+  CreateProjectMaterialItemInput,
 ) {
   @Field(() => Int)
   @IsNotEmpty()
   @IsInt()
   id: number
+}
+
+@InputType()
+export class UpdateManyProjectMaterialsInput {
+  @Field(() => [UpdateProjectMaterialInput])
+  @ValidateNested({ each: true })
+  @Type(() => UpdateProjectMaterialInput)
+  materials: UpdateProjectMaterialInput[]
 }
