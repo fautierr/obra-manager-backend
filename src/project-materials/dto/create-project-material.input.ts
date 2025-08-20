@@ -8,6 +8,11 @@ export class CreateProjectMaterialItemInput {
   @IsNotEmpty()
   materialId: number
 
+  @Field(() => Int)
+  @IsInt()
+  @IsNotEmpty()
+  categoryId: number
+
   @Field(() => Float)
   @IsNumber()
   @IsNotEmpty()

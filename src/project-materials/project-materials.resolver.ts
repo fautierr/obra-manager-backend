@@ -3,6 +3,8 @@ import { ProjectMaterialsService } from './project-materials.service'
 import { ProjectMaterial } from './entities/project-material.entity'
 import { CreateProjectMaterialInput } from './dto/create-project-material.input'
 import { UpdateManyProjectMaterialsInput } from './dto/update-project-material.input'
+import { ProjectCategoryProgress } from './dto/project-category-progress.dto'
+// import { ProjectCategoryProgress } from './dto/project-category-progress.dto'
 
 @Resolver(() => ProjectMaterial)
 export class ProjectMaterialsResolver {
@@ -15,6 +17,15 @@ export class ProjectMaterialsResolver {
     const projectMaterials =
       await this.projectMaterialsService.findAll(projectId)
     return projectMaterials
+  }
+
+  @Query(() => [ProjectCategoryProgress], {
+    name: 'findProjectCategoryProgress',
+  })
+  async findProjectCategoryProgress(
+    @Args('projectId', { type: () => String }) projectId: string,
+  ): Promise<ProjectCategoryProgress[]> {
+    return this.projectMaterialsService.getCategoryProgress(projectId)
   }
 
   @Mutation(() => [ProjectMaterial], { name: 'createProjectMaterials' })

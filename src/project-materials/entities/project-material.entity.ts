@@ -9,6 +9,7 @@ import {
 } from 'typeorm'
 import { Project } from 'src/projects/entities/project.entity'
 import { Material } from 'src/materials/entities/material.entity'
+import { Category } from 'src/categories/entities/category.entity'
 
 @ObjectType()
 @Entity('project_materials', { schema: 'construction' })
@@ -38,4 +39,9 @@ export class ProjectMaterial {
   @Field()
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date
+
+  @Field(() => Category)
+  @ManyToOne(() => Category, { eager: true })
+  @JoinColumn({ name: 'category_id' })
+  category: Category
 }
