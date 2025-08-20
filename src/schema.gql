@@ -64,6 +64,19 @@ type ProjectMaterial {
   quantity: Float!
   unit_price: Float
   createdAt: DateTime!
+  category: Category!
+}
+
+type MaterialCategory {
+  materialId: Int!
+  categoryId: Int!
+  material: Material!
+  category: Category!
+}
+
+type ProjectCategoryProgress {
+  categoryId: Int!
+  categoryName: String!
 }
 
 type MaterialBreakdown {
@@ -103,8 +116,11 @@ type Query {
   findAllMaterials: [Material!]!
   findMaterialById(materialId: Float!): Material!
   findMaterialsByProjectId(projectId: String!): [ProjectMaterial!]!
+  findProjectCategoryProgress(projectId: String!): [ProjectCategoryProgress!]!
   findProjectTotals(projectId: String!): ProjectTotals!
   findProjectComparison(project1Id: String!, project2Id: String!): ProjectComparison!
+  findAllMaterialCategories: [MaterialCategory!]!
+  findMaterialCategoriesByFilter(materialId: Int, categoryId: Int): [MaterialCategory!]!
 }
 
 type Mutation {
@@ -142,6 +158,7 @@ input CreateProjectMaterialInput {
 
 input CreateProjectMaterialItemInput {
   materialId: Int!
+  categoryId: Int!
   quantity: Float!
   unitPrice: Float
 }
@@ -151,8 +168,8 @@ input UpdateManyProjectMaterialsInput {
 }
 
 input UpdateProjectMaterialInput {
-  materialId: Int
+  id: Int!
   quantity: Float
   unitPrice: Float
-  id: Int!
+  categoryId: Int
 }

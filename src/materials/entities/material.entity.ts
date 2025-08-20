@@ -5,8 +5,11 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  // OneToMany,
 } from 'typeorm'
 import { Unit } from 'src/units/entities/unit.entity'
+// import { MaterialCategory } from 'src/material-categories/entities/material-category.entity'
+// import { ProjectMaterial } from 'src/project-materials/entities/project-material.entity'
 
 @ObjectType()
 @Entity({ schema: 'construction', name: 'materials' })
@@ -35,4 +38,10 @@ export class Material {
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at?: Date
+
+  // @OneToMany(() => MaterialCategory, (mc) => mc.material)
+  // materialCategories: MaterialCategory[]
+
+  // @OneToMany(() => ProjectMaterial, (pm) => pm.material)
+  // projectMaterials: ProjectMaterial[]
 }
