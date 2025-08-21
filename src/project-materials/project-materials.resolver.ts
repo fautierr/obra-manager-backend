@@ -4,6 +4,7 @@ import { ProjectMaterial } from './entities/project-material.entity'
 import { CreateProjectMaterialInput } from './dto/create-project-material.input'
 import { UpdateManyProjectMaterialsInput } from './dto/update-project-material.input'
 import { ProjectCategoryProgress } from './dto/project-category-progress.dto'
+import { CategoryDetail } from './dto/category-detail.dto'
 // import { ProjectCategoryProgress } from './dto/project-category-progress.dto'
 
 @Resolver(() => ProjectMaterial)
@@ -26,6 +27,19 @@ export class ProjectMaterialsResolver {
     @Args('projectId', { type: () => String }) projectId: string,
   ): Promise<ProjectCategoryProgress[]> {
     return this.projectMaterialsService.getCategoryProgress(projectId)
+  }
+
+  @Query(() => [CategoryDetail], { name: 'findProjectCategoryDetails' })
+  async findProjectCategoryDetails(
+    @Args('projectId', { type: () => String }) projectId: string,
+    @Args('categoryId', { type: () => Int }) categoryId: number,
+  ) {
+    const categoryDetails =
+      await this.projectMaterialsService.getCategoryDetails(
+        projectId,
+        categoryId,
+      )
+    return categoryDetails
   }
 
   @Mutation(() => [ProjectMaterial], { name: 'createProjectMaterials' })

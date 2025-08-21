@@ -79,6 +79,20 @@ type ProjectCategoryProgress {
   categoryName: String!
 }
 
+type UnitDTO {
+  id: Int!
+  name: String!
+  abbreviation: String!
+}
+
+type CategoryDetail {
+  name: String!
+  unit: UnitDTO!
+  description: String
+  quantity: Float!
+  unitPrice: Float!
+}
+
 type MaterialBreakdown {
   materialId: ID!
   materialName: String!
@@ -117,6 +131,7 @@ type Query {
   findMaterialById(materialId: Float!): Material!
   findMaterialsByProjectId(projectId: String!): [ProjectMaterial!]!
   findProjectCategoryProgress(projectId: String!): [ProjectCategoryProgress!]!
+  findProjectCategoryDetails(projectId: String!, categoryId: Int!): [CategoryDetail!]!
   findProjectTotals(projectId: String!): ProjectTotals!
   findProjectComparison(project1Id: String!, project2Id: String!): ProjectComparison!
   findAllMaterialCategories: [MaterialCategory!]!

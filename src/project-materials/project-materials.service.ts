@@ -13,6 +13,7 @@ import { UpdateProjectMaterialInput } from './dto/update-project-material.input'
 import { Category } from 'src/categories/entities/category.entity'
 import { MaterialCategory } from 'src/material-categories/entities/material-category.entity'
 import { ProjectCategoryProgress } from './dto/project-category-progress.dto'
+import { CategoryDetail } from './dto/category-detail.dto'
 
 @Injectable()
 export class ProjectMaterialsService {
@@ -59,6 +60,30 @@ export class ProjectMaterialsService {
   `
 
     return await this.dataSource.query(query, [projectId])
+  }
+
+  async getCategoryDetails(
+    projectId: string,
+    categoryId: number,
+  ): Promise<CategoryDetail[]> {
+    const query = `
+SELECT 
+  m.name AS "name",
+  m.description AS "description",
+  pm.quantity,
+  pm.unit_price AS "unitPrice",
+  jsonb_build_object(
+    'id', u.id,
+    'name', u.name,
+    'abbreviation', u.abbreviation
+  ) AS unit
+FROM construction.project_materials pm
+JOIN construction.materials m ON m.id = pm.material_id
+JOIN construction.units u ON u.id = m.unit_id
+WHERE pm.project_id = $1 AND pm.category_id = $2
+`
+
+    return await this.dataSource.query(query, [projectId, categoryId])
   }
 
   async createMany(
