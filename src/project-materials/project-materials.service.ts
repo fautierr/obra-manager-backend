@@ -67,21 +67,21 @@ export class ProjectMaterialsService {
     categoryId: number,
   ): Promise<CategoryDetail[]> {
     const query = `
-SELECT 
-  m.name AS "name",
-  m.description AS "description",
-  pm.quantity,
-  pm.unit_price AS "unitPrice",
-  jsonb_build_object(
-    'id', u.id,
-    'name', u.name,
-    'abbreviation', u.abbreviation
-  ) AS unit
-FROM construction.project_materials pm
-JOIN construction.materials m ON m.id = pm.material_id
-JOIN construction.units u ON u.id = m.unit_id
-WHERE pm.project_id = $1 AND pm.category_id = $2
-`
+      SELECT 
+        m.name AS "name",
+        m.description AS "description",
+        pm.quantity,
+        pm.unit_price AS "unitPrice",
+        jsonb_build_object(
+          'id', u.id,
+          'name', u.name,
+          'abbreviation', u.abbreviation
+        ) AS unit
+      FROM construction.project_materials pm
+      JOIN construction.materials m ON m.id = pm.material_id
+      JOIN construction.units u ON u.id = m.unit_id
+      WHERE pm.project_id = $1 AND pm.category_id = $2
+      `
 
     return await this.dataSource.query(query, [projectId, categoryId])
   }
