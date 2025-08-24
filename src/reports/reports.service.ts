@@ -1,131 +1,78 @@
-// reports.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common'
-import {
-  ProjectTotals,
-  ProjectComparison,
-  MaterialBreakdown,
-} from './dto/reports.dto'
-import { ProjectMaterial } from 'src/project-materials/entities/project-material.entity'
-import { Repository } from 'typeorm'
-import { InjectRepository } from '@nestjs/typeorm'
+import { ProjectReportsDTO, ProjectReportsItemDTO } from './dto/reports.dto'
+import { ReportsRepository } from './reports.repository'
+import { ProjectsService } from 'src/projects/projects.service'
+import { validatePagination } from 'src/utils/filters/validate-pagination'
 
 @Injectable()
 export class ReportsService {
   constructor(
-    @InjectRepository(ProjectMaterial)
-    private projectMaterialsRepo: Repository<ProjectMaterial>,
+    private readonly projectsService: ProjectsService,
+    private readonly reportsRepo: ReportsRepository,
   ) {}
+  async findProjectTotals(
+    projectId: string,
+    limit: number,
+    offset: number,
+  ): Promise<ProjectReportsItemDTO> {
+    validatePagination(limit, offset)
+    await this.projectsService.ensureExists(projectId)
 
-  // Totales de un proyecto
-  async findProjectTotals(projectId: string): Promise<ProjectTotals> {
-    const projectMaterials = await this.projectMaterialsRepo.find({
-      where: { project: { id: projectId } },
-      relations: ['material'],
-    })
-
-    if (!projectMaterials.length)
-      throw new NotFoundException(`Project ${projectId} has no materials`)
-
-    const totalCostRaw = projectMaterials.reduce(
-      (acc, m) => acc + Number(m.quantity) * Number(m.unit_price),
-      0,
+    const total = await this.reportsRepo.getProjectTotal(projectId)
+    this.validateTotal(total)
+    const materials = await this.reportsRepo.getMaterialsData(
+      projectId,
+      limit,
+      offset,
     )
-    const totalCost = Number(totalCostRaw.toFixed(2))
 
-    const materials: MaterialBreakdown[] = projectMaterials.map((m) => {
-      const materialTotal = Number(
-        (Number(m.quantity) * Number(m.unit_price)).toFixed(2),
-      )
-      const percentage = totalCost
-        ? Number(((materialTotal * 100) / totalCost).toFixed(2))
-        : 0
-      return {
-        materialId: m.material.id,
-        materialName: m.material.name,
-        quantity: Number(Number(m.quantity).toFixed(2)),
-        totalCost: materialTotal,
-        percentageOfProject: percentage,
-      }
-    })
+    return { projectId, total, materials }
+  }
+
+  async findProjectsComparison(
+    projectId1: string,
+    projectId2: string,
+    limit: number,
+    offset: number,
+  ): Promise<ProjectReportsDTO> {
+    validatePagination(limit, offset)
+    await this.projectsService.ensureExists(projectId1)
+    await this.projectsService.ensureExists(projectId2)
+
+    const total1 = await this.reportsRepo.getProjectTotal(projectId1)
+    const total2 = await this.reportsRepo.getProjectTotal(projectId2)
+    this.validateTotal(total1)
+    this.validateTotal(total2)
+
+    const materials1 = await this.reportsRepo.getMaterialsData(
+      projectId1,
+      limit,
+      offset,
+    )
+    const materials2 = await this.reportsRepo.getMaterialsData(
+      projectId2,
+      limit,
+      offset,
+    )
+    console.log(total1, total2)
+    const differencePercentage = parseFloat(
+      ((Math.abs(total1 - total2) / Math.max(total1, total2)) * 100).toFixed(2),
+    )
 
     return {
-      projectId,
-      totalCost,
-      materials,
+      project1: { projectId: projectId1, total: total1, materials: materials1 },
+      project2: { projectId: projectId2, total: total2, materials: materials2 },
+      differencePercentage,
     }
   }
 
-  // Comparación entre dos proyectos
-  async findProjectComparison(
-    project1Id: string,
-    project2Id: string,
-  ): Promise<ProjectComparison> {
-    const project1Materials = await this.projectMaterialsRepo.find({
-      where: { project: { id: project1Id } },
-      relations: ['material'],
-    })
-    const project2Materials = await this.projectMaterialsRepo.find({
-      where: { project: { id: project2Id } },
-      relations: ['material'],
-    })
+  // Validations
 
-    if (!project1Materials.length)
-      throw new NotFoundException(`Project ${project1Id} has no materials`)
-    if (!project2Materials.length)
-      throw new NotFoundException(`Project ${project2Id} has no materials`)
-
-    const calcTotal = (materials: ProjectMaterial[]) =>
-      Number(
-        materials
-          .reduce(
-            (acc, m) => acc + Number(m.quantity) * Number(m.unit_price),
-            0,
-          )
-          .toFixed(2),
+  validateTotal(total: number): void {
+    if (!total) {
+      throw new NotFoundException(
+        `The total could not be calculated from ${total}`,
       )
-
-    const project1Total = calcTotal(project1Materials)
-    const project2Total = calcTotal(project2Materials)
-
-    const difference = Number(
-      Math.abs(project1Total - project2Total).toFixed(2),
-    )
-    const differencePercentage = Number(
-      ((difference / Math.max(project1Total, project2Total)) * 100).toFixed(2),
-    )
-    const higherProjectId =
-      project1Total > project2Total ? project1Id : project2Id
-
-    const calcBreakdown = (
-      materials: ProjectMaterial[],
-      total: number,
-    ): MaterialBreakdown[] =>
-      materials.map((m) => {
-        const materialTotal = Number(
-          (Number(m.quantity) * Number(m.unit_price)).toFixed(2),
-        )
-        const percentage = total
-          ? Number(((materialTotal * 100) / total).toFixed(2))
-          : 0
-        return {
-          materialId: m.material.id,
-          materialName: m.material.name,
-          quantity: Number(Number(m.quantity).toFixed(2)),
-          totalCost: materialTotal,
-          percentageOfProject: percentage,
-        }
-      })
-
-    return {
-      project1Id,
-      project1Total,
-      project2Id,
-      project2Total,
-      difference,
-      differencePercentage,
-      higherProjectId,
-      project1Materials: calcBreakdown(project1Materials, project1Total),
-      project2Materials: calcBreakdown(project2Materials, project2Total),
     }
   }
 }

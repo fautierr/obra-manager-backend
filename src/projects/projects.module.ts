@@ -8,5 +8,6 @@ import { ProjectStatus } from 'src/project-statuses/entities/project-status.enti
 @Module({
   imports: [TypeOrmModule.forFeature([Project, User, ProjectStatus])],
   providers: [ProjectsResolver, ProjectsService],
+  exports: [ProjectsService],
 })
 export class ProjectsModule {}

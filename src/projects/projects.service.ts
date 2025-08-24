@@ -41,13 +41,7 @@ export class ProjectsService {
     }
   }
   async findById(id: string): Promise<Project> {
-    const project = await this.projectsRepo.findOne({
-      where: { id, is_deleted: false },
-    })
-
-    if (!project) {
-      throw new NotFoundException(`Project ${id} not found`)
-    }
+    const project = await this.ensureExists(id)
 
     return project
   }
@@ -71,8 +65,7 @@ export class ProjectsService {
     return await this.projectsRepo.save(project)
   }
   async update(id: string, input: UpdateProjectInput): Promise<Project> {
-    const project = await this.projectsRepo.findOne({ where: { id } })
-    if (!project) throw new NotFoundException(`Project ${id} not found`)
+    const project = await this.ensureExists(id)
 
     if (input.statusId) {
       const status = await this.projectStatusRepo.findOne({
@@ -88,14 +81,23 @@ export class ProjectsService {
 
     return await this.projectsRepo.save(project)
   }
-  async remove(projectId: string): Promise<Project> {
-    const project = await this.projectsRepo.findOne({
-      where: { id: projectId },
-    })
-    if (!project) throw new NotFoundException(`Project ${projectId} not found`)
+  async remove(id: string): Promise<Project> {
+    const project = await this.ensureExists(id)
 
     project.is_deleted = true
 
     return this.projectsRepo.save(project)
+  }
+
+  // Validations
+
+  async ensureExists(id: string): Promise<Project> {
+    const project = await this.projectsRepo.findOne({
+      where: { id, is_deleted: false },
+    })
+    if (!project) {
+      throw new NotFoundException(`Project ${id} not found`)
+    }
+    return project
   }
 }

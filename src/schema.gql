@@ -93,30 +93,23 @@ type CategoryDetail {
   unitPrice: Float!
 }
 
-type MaterialBreakdown {
-  materialId: ID!
-  materialName: String!
+type MaterialReportsDTO {
+  name: String!
   quantity: Float!
-  totalCost: Float!
-  percentageOfProject: Float!
+  total: Float!
+  percentage: Float!
 }
 
-type ProjectComparison {
-  project1Id: ID!
-  project1Total: Float!
-  project2Id: ID!
-  project2Total: Float!
-  difference: Float!
-  differencePercentage: Float!
-  higherProjectId: ID!
-  project1Materials: [MaterialBreakdown!]!
-  project2Materials: [MaterialBreakdown!]!
-}
-
-type ProjectTotals {
+type ProjectReportsItemDTO {
   projectId: ID!
-  totalCost: Float!
-  materials: [MaterialBreakdown!]!
+  total: Float!
+  materials: [MaterialReportsDTO!]!
+}
+
+type ProjectReportsDTO {
+  project1: ProjectReportsItemDTO!
+  project2: ProjectReportsItemDTO!
+  differencePercentage: Float!
 }
 
 type Query {
@@ -132,8 +125,8 @@ type Query {
   findMaterialsByProjectId(projectId: String!): [ProjectMaterial!]!
   findProjectCategoryProgress(projectId: String!): [ProjectCategoryProgress!]!
   findProjectCategoryDetails(projectId: String!, categoryId: Int!): [CategoryDetail!]!
-  findProjectTotals(projectId: String!): ProjectTotals!
-  findProjectComparison(project1Id: String!, project2Id: String!): ProjectComparison!
+  findProjectTotals(projectId: String!, limit: Float, offset: Float): ProjectReportsItemDTO!
+  findProjectComparison(project1Id: String!, project2Id: String!, limit: Float, offset: Float): ProjectReportsDTO!
   findAllMaterialCategories: [MaterialCategory!]!
   findMaterialCategoriesByFilter(materialId: Int, categoryId: Int): [MaterialCategory!]!
 }

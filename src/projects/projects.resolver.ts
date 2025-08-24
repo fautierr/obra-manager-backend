@@ -37,7 +37,7 @@ export class ProjectsResolver {
   }
 
   @Mutation(() => Project, { name: 'deleteProject' })
-  delete(@Args('projectId', { type: () => String }) projectId: string) {
-    return this.projectsService.remove(projectId)
+  delete(@Args('projectId', { type: () => String }) id: string) {
+    return this.projectsService.remove(id)
   }
 }
