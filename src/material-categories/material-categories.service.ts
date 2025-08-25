@@ -39,4 +39,24 @@ export class MaterialCategoriesService {
 
     return query.getMany()
   }
+
+  // Validations
+
+  async materialCategoryExists(
+    materialId: number,
+    categoryId: number,
+  ): Promise<void> {
+    const validRelation = await this.materialCategoriesRepo.findOne({
+      where: {
+        material: { id: materialId },
+        category: { id: categoryId },
+      },
+    })
+
+    if (!validRelation) {
+      throw new BadRequestException(
+        `Material ${materialId} does not belong to category ${categoryId}`,
+      )
+    }
+  }
 }

@@ -1,4 +1,10 @@
-import { IsInt, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator'
+import {
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator'
 import { InputType, Field, Int, Float } from '@nestjs/graphql'
 import { Type } from 'class-transformer'
 
@@ -10,14 +16,17 @@ export class UpdateProjectMaterialInput {
   id: number
 
   @Field(() => Float, { nullable: true })
+  @IsOptional()
   @IsNumber()
   quantity?: number
 
   @Field(() => Float, { nullable: true })
+  @IsOptional()
   @IsNumber()
   unitPrice?: number
 
   @Field(() => Int, { nullable: true })
+  @IsOptional()
   @IsInt()
   categoryId?: number
 }

@@ -7,6 +7,10 @@ import { Project } from 'src/projects/entities/project.entity'
 import { Material } from 'src/materials/entities/material.entity'
 import { Category } from 'src/categories/entities/category.entity'
 import { MaterialCategory } from 'src/material-categories/entities/material-category.entity'
+import { ProjectsModule } from 'src/projects/projects.module'
+import { MaterialsModule } from 'src/materials/materials.module'
+import { CategoriesModule } from 'src/categories/categories.module'
+import { MaterialCategoriesModule } from 'src/material-categories/material-categories.module'
 
 @Module({
   imports: [
@@ -17,6 +21,10 @@ import { MaterialCategory } from 'src/material-categories/entities/material-cate
       Category,
       MaterialCategory,
     ]),
+    ProjectsModule,
+    MaterialsModule,
+    CategoriesModule,
+    MaterialCategoriesModule,
   ],
   providers: [ProjectMaterialsResolver, ProjectMaterialsService],
 })

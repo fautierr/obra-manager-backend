@@ -25,4 +25,17 @@ export class MaterialsService {
 
     return material
   }
+
+  // Validations
+
+  async materialExists(id: number): Promise<Material> {
+    const material = await this.materialsRepo.findOne({
+      where: { id },
+    })
+    if (!material) {
+      throw new NotFoundException(`Material ${id} not found`)
+    }
+
+    return material
+  }
 }
