@@ -7,28 +7,24 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { ProjectMaterial } from './entities/project-material.entity'
 import { DataSource, Repository } from 'typeorm'
 import { CreateProjectMaterialInput } from './dto/create-project-material.input'
-import { Project } from 'src/projects/entities/project.entity'
-import { Material } from 'src/materials/entities/material.entity'
 import { UpdateProjectMaterialInput } from './dto/update-project-material.input'
-import { Category } from 'src/categories/entities/category.entity'
-import { MaterialCategory } from 'src/material-categories/entities/material-category.entity'
 import { ProjectCategoryProgress } from './dto/project-category-progress.dto'
 import { CategoryDetail } from './dto/category-detail.dto'
+import { ProjectsService } from 'src/projects/projects.service'
+import { MaterialsService } from 'src/materials/materials.service'
+import { CategoriesService } from 'src/categories/categories.service'
+import { MaterialCategoriesService } from 'src/material-categories/material-categories.service'
 
 @Injectable()
 export class ProjectMaterialsService {
   constructor(
     @InjectRepository(ProjectMaterial)
     private projectMaterialsRepo: Repository<ProjectMaterial>,
-    @InjectRepository(Project)
-    private projectsRepo: Repository<Project>,
-    @InjectRepository(Material)
-    private materialsRepo: Repository<Material>,
-    @InjectRepository(Category)
-    private categoriesRepo: Repository<Category>,
-    @InjectRepository(MaterialCategory)
-    private materialCategoriesRepo: Repository<MaterialCategory>,
     private dataSource: DataSource,
+    private readonly projectsService: ProjectsService,
+    private readonly materialsService: MaterialsService,
+    private readonly categoriesService: CategoriesService,
+    private readonly materialCategoriesService: MaterialCategoriesService,
   ) {}
   async findAll(projectId: string): Promise<ProjectMaterial[]> {
     const projectMaterials = await this.projectMaterialsRepo.find({
@@ -89,41 +85,18 @@ export class ProjectMaterialsService {
   async createMany(
     input: CreateProjectMaterialInput,
   ): Promise<ProjectMaterial[]> {
-    const project = await this.projectsRepo.findOne({
-      where: { id: input.projectId },
-    })
-    if (!project) {
-      throw new NotFoundException(`Project ${input.projectId} not found`)
-    }
+    const project = await this.projectsService.ensureExists(input.projectId)
 
     const materialsToSave: ProjectMaterial[] = []
 
     for (const m of input.materials) {
-      const material = await this.materialsRepo.findOne({
-        where: { id: m.materialId },
-      })
-      if (!material) {
-        throw new NotFoundException(`Material ${m.materialId} not found`)
-      }
-
-      const category = await this.categoriesRepo.findOne({
-        where: { id: m.categoryId },
-      })
-      if (!category)
-        throw new NotFoundException(`Category ${m.categoryId} not found`)
-
-      const validRelation = await this.materialCategoriesRepo.findOne({
-        where: {
-          material: { id: m.materialId },
-          category: { id: m.categoryId },
-        },
-      })
-
-      if (!validRelation) {
-        throw new BadRequestException(
-          `Material ${m.materialId} does not belong to category ${m.categoryId}`,
-        )
-      }
+      const material = await this.materialsService.materialExists(m.materialId)
+      const category = await this.categoriesService.categoryExists(m.categoryId)
+      // validRelation
+      await this.materialCategoriesService.materialCategoryExists(
+        m.materialId,
+        m.categoryId,
+      )
 
       const projectMaterial = this.projectMaterialsRepo.create({
         project,
@@ -144,16 +117,11 @@ export class ProjectMaterialsService {
     const updatedMaterials: ProjectMaterial[] = []
 
     for (const input of inputs) {
-      const projectMaterial = await this.projectMaterialsRepo.findOne({
-        where: { id: input.id },
-        relations: ['material', 'project'],
-      })
+      const projectMaterial = await this.projectMaterialExists(input.id)
 
-      if (!projectMaterial) {
-        throw new NotFoundException(`ProjectMaterial ${input.id} not found`)
-      }
+      this.nothingToUpdateExist(input)
 
-      if (input.quantity !== undefined) {
+      if (input.quantity !== undefined && input.quantity !== null) {
         projectMaterial.quantity = input.quantity
       }
 
@@ -162,25 +130,14 @@ export class ProjectMaterialsService {
       }
 
       if (input.categoryId !== undefined) {
-        const category = await this.categoriesRepo.findOne({
-          where: { id: input.categoryId },
-        })
-        if (!category) {
-          throw new NotFoundException(`Category ${input.categoryId} not found`)
-        }
+        const category = await this.categoriesService.categoryExists(
+          input.categoryId,
+        )
 
-        const validRelation = await this.materialCategoriesRepo.findOne({
-          where: {
-            material: { id: projectMaterial.material.id },
-            category: { id: input.categoryId },
-          },
-        })
-
-        if (!validRelation) {
-          throw new BadRequestException(
-            `Material ${projectMaterial.material.id} does not belong to category ${input.categoryId}`,
-          )
-        }
+        await this.materialCategoriesService.materialCategoryExists(
+          projectMaterial.material.id,
+          input.categoryId,
+        )
         projectMaterial.category = category
       }
 
@@ -199,5 +156,33 @@ export class ProjectMaterialsService {
     }
 
     return true
+  }
+
+  // Validations
+
+  async projectMaterialExists(id: number): Promise<ProjectMaterial> {
+    const projectMaterial = await this.projectMaterialsRepo.findOne({
+      where: { id },
+      relations: ['material', 'project'],
+    })
+
+    if (!projectMaterial) {
+      throw new NotFoundException(`ProjectMaterial ${id} not found`)
+    }
+
+    return projectMaterial
+  }
+
+  nothingToUpdateExist(input: UpdateProjectMaterialInput): void {
+    const nothingToUpdate =
+      input.quantity === undefined &&
+      input.unitPrice === undefined &&
+      input.categoryId === undefined
+
+    if (nothingToUpdate) {
+      throw new BadRequestException(
+        `ProjectMaterial ${input.id} must include at least one field to update`,
+      )
+    }
   }
 }

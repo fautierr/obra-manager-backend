@@ -125,10 +125,10 @@ type Query {
   findMaterialsByProjectId(projectId: String!): [ProjectMaterial!]!
   findProjectCategoryProgress(projectId: String!): [ProjectCategoryProgress!]!
   findProjectCategoryDetails(projectId: String!, categoryId: Int!): [CategoryDetail!]!
-  findProjectTotals(projectId: String!, limit: Float, offset: Float): ProjectReportsItemDTO!
-  findProjectComparison(project1Id: String!, project2Id: String!, limit: Float, offset: Float): ProjectReportsDTO!
   findAllMaterialCategories: [MaterialCategory!]!
   findMaterialCategoriesByFilter(materialId: Int, categoryId: Int): [MaterialCategory!]!
+  findProjectTotals(projectId: String!, limit: Float, offset: Float): ProjectReportsItemDTO!
+  findProjectComparison(project1Id: String!, project2Id: String!, limit: Float, offset: Float): ProjectReportsDTO!
 }
 
 type Mutation {
