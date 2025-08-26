@@ -7,6 +7,7 @@ import {
 import { ReportsRepository } from './reports.repository'
 import { ProjectsService } from 'src/projects/projects.service'
 import { validatePagination } from 'src/utils/filters/validate-pagination'
+import { MaterialReportsRow } from './types/reports.types'
 
 @Injectable()
 export class ReportsService {
@@ -14,6 +15,15 @@ export class ReportsService {
     private readonly projectsService: ProjectsService,
     private readonly reportsRepo: ReportsRepository,
   ) {}
+
+  private mapMaterialRows(rows: MaterialReportsRow[]) {
+    return rows.map((r) => ({
+      name: r.name,
+      quantity: parseFloat(r.quantity),
+      total: parseFloat(r.total),
+      percentage: parseFloat(r.percentage),
+    }))
+  }
   async findProjectTotals(
     projectId: string,
     limit: number,
@@ -21,13 +31,15 @@ export class ReportsService {
   ): Promise<ProjectReportsItemDTO> {
     validatePagination(limit, offset)
     await this.projectsService.ensureExists(projectId)
-    const materials = await this.reportsRepo.getMaterialsData(
+    const rows = await this.reportsRepo.getMaterialsData(
       projectId,
       limit,
       offset,
     )
-    this.validateMaterials(materials, projectId)
-    const total = await this.reportsRepo.getProjectTotal(projectId)
+    const materials = this.mapMaterialRows(rows)
+
+    const totalRaw = await this.reportsRepo.getProjectTotal(projectId)
+    const total = parseFloat(totalRaw.total || '0')
 
     return { projectId, total, materials }
   }
@@ -42,21 +54,26 @@ export class ReportsService {
     await this.projectsService.ensureExists(projectId1)
     await this.projectsService.ensureExists(projectId2)
 
-    const materials1 = await this.reportsRepo.getMaterialsData(
+    const rows1 = await this.reportsRepo.getMaterialsData(
       projectId1,
       limit,
       offset,
     )
-    const materials2 = await this.reportsRepo.getMaterialsData(
+    const rows2 = await this.reportsRepo.getMaterialsData(
       projectId2,
       limit,
       offset,
     )
-    this.validateMaterials(materials1, projectId1)
-    this.validateMaterials(materials2, projectId2)
 
-    const total1 = await this.reportsRepo.getProjectTotal(projectId1)
-    const total2 = await this.reportsRepo.getProjectTotal(projectId2)
+    const materials1 = this.mapMaterialRows(rows1)
+    const materials2 = this.mapMaterialRows(rows2)
+
+    const total1 = parseFloat(
+      (await this.reportsRepo.getProjectTotal(projectId1)).total || '0',
+    )
+    const total2 = parseFloat(
+      (await this.reportsRepo.getProjectTotal(projectId2)).total || '0',
+    )
 
     const differencePercentage = parseFloat(
       ((Math.abs(total1 - total2) / Math.max(total1, total2)) * 100).toFixed(2),
