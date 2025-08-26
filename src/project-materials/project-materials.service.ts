@@ -14,6 +14,7 @@ import { ProjectsService } from 'src/projects/projects.service'
 import { MaterialsService } from 'src/materials/materials.service'
 import { CategoriesService } from 'src/categories/categories.service'
 import { MaterialCategoriesService } from 'src/material-categories/material-categories.service'
+import { ProjectMaterialsRepository } from './project-materials.repository'
 
 @Injectable()
 export class ProjectMaterialsService {
@@ -21,6 +22,7 @@ export class ProjectMaterialsService {
     @InjectRepository(ProjectMaterial)
     private projectMaterialsRepo: Repository<ProjectMaterial>,
     private dataSource: DataSource,
+    private readonly projectMaterialsCustomRepo: ProjectMaterialsRepository,
     private readonly projectsService: ProjectsService,
     private readonly materialsService: MaterialsService,
     private readonly categoriesService: CategoriesService,
@@ -40,46 +42,35 @@ export class ProjectMaterialsService {
   async getCategoryProgress(
     projectId: string,
   ): Promise<ProjectCategoryProgress[]> {
-    const query = `
-    SELECT
-      c.id AS "categoryId",
-      c.name AS "categoryName"
-    FROM construction.categories c
-    INNER JOIN construction.material_categories mc
-      ON mc.category_id = c.id
-    INNER JOIN construction.materials m
-      ON m.id = mc.material_id
-    INNER JOIN construction.project_materials pm
-      ON pm.material_id = m.id
-     AND pm.project_id = $1
-    GROUP BY c.id, c.name;
-  `
+    const rows =
+      await this.projectMaterialsCustomRepo.findCategoryProgress(projectId)
 
-    return await this.dataSource.query(query, [projectId])
+    return rows.map((row) => ({
+      categoryId: row.categoryId,
+      categoryName: row.categoryName,
+    }))
   }
 
   async getCategoryDetails(
     projectId: string,
     categoryId: number,
   ): Promise<CategoryDetail[]> {
-    const query = `
-      SELECT 
-        m.name AS "name",
-        m.description AS "description",
-        pm.quantity,
-        pm.unit_price AS "unitPrice",
-        jsonb_build_object(
-          'id', u.id,
-          'name', u.name,
-          'abbreviation', u.abbreviation
-        ) AS unit
-      FROM construction.project_materials pm
-      JOIN construction.materials m ON m.id = pm.material_id
-      JOIN construction.units u ON u.id = m.unit_id
-      WHERE pm.project_id = $1 AND pm.category_id = $2
-      `
+    const rows = await this.projectMaterialsCustomRepo.findCategoryDetails(
+      projectId,
+      categoryId,
+    )
 
-    return await this.dataSource.query(query, [projectId, categoryId])
+    return rows.map((row) => ({
+      name: row.name,
+      description: row.description,
+      quantity: Number(row.quantity),
+      unitPrice: Number(row.unitPrice),
+      unit: {
+        id: row.unit_id,
+        name: row.unit_name,
+        abbreviation: row.unit_abbreviation,
+      },
+    }))
   }
 
   async createMany(

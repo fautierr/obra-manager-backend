@@ -11,6 +11,7 @@ import { ProjectsModule } from 'src/projects/projects.module'
 import { MaterialsModule } from 'src/materials/materials.module'
 import { CategoriesModule } from 'src/categories/categories.module'
 import { MaterialCategoriesModule } from 'src/material-categories/material-categories.module'
+import { ProjectMaterialsRepository } from './project-materials.repository'
 
 @Module({
   imports: [
@@ -26,6 +27,10 @@ import { MaterialCategoriesModule } from 'src/material-categories/material-categ
     CategoriesModule,
     MaterialCategoriesModule,
   ],
-  providers: [ProjectMaterialsResolver, ProjectMaterialsService],
+  providers: [
+    ProjectMaterialsResolver,
+    ProjectMaterialsService,
+    ProjectMaterialsRepository,
+  ],
 })
 export class ProjectMaterialsModule {}
