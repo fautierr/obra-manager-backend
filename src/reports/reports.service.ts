@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { ProjectReportsDTO, ProjectReportsItemDTO } from './dto/reports.dto'
+import { Injectable } from '@nestjs/common'
+import {
+  MaterialReportsDTO,
+  ProjectReportsDTO,
+  ProjectReportsItemDTO,
+} from './dto/reports.dto'
 import { ReportsRepository } from './reports.repository'
 import { ProjectsService } from 'src/projects/projects.service'
 import { validatePagination } from 'src/utils/filters/validate-pagination'
@@ -17,14 +21,13 @@ export class ReportsService {
   ): Promise<ProjectReportsItemDTO> {
     validatePagination(limit, offset)
     await this.projectsService.ensureExists(projectId)
-
-    const total = await this.reportsRepo.getProjectTotal(projectId)
-    this.validateTotal(total)
     const materials = await this.reportsRepo.getMaterialsData(
       projectId,
       limit,
       offset,
     )
+    this.validateMaterials(materials, projectId)
+    const total = await this.reportsRepo.getProjectTotal(projectId)
 
     return { projectId, total, materials }
   }
@@ -39,11 +42,6 @@ export class ReportsService {
     await this.projectsService.ensureExists(projectId1)
     await this.projectsService.ensureExists(projectId2)
 
-    const total1 = await this.reportsRepo.getProjectTotal(projectId1)
-    const total2 = await this.reportsRepo.getProjectTotal(projectId2)
-    this.validateTotal(total1)
-    this.validateTotal(total2)
-
     const materials1 = await this.reportsRepo.getMaterialsData(
       projectId1,
       limit,
@@ -54,7 +52,12 @@ export class ReportsService {
       limit,
       offset,
     )
-    console.log(total1, total2)
+    this.validateMaterials(materials1, projectId1)
+    this.validateMaterials(materials2, projectId2)
+
+    const total1 = await this.reportsRepo.getProjectTotal(projectId1)
+    const total2 = await this.reportsRepo.getProjectTotal(projectId2)
+
     const differencePercentage = parseFloat(
       ((Math.abs(total1 - total2) / Math.max(total1, total2)) * 100).toFixed(2),
     )
@@ -68,11 +71,15 @@ export class ReportsService {
 
   // Validations
 
-  validateTotal(total: number): void {
-    if (!total) {
-      throw new NotFoundException(
-        `The total could not be calculated from ${total}`,
-      )
+  validateMaterials(
+    materials: MaterialReportsDTO[],
+    projectId: string,
+  ): { projectId: string; total: number; materials: MaterialReportsDTO[] } {
+    if (materials.length === 0) {
+      return { projectId, total: 0, materials: [] }
     }
+    const total = materials.reduce((acc, m) => acc + m.total, 0)
+
+    return { projectId, total, materials }
   }
 }
