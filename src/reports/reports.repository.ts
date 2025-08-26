@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ProjectMaterial } from 'src/project-materials/entities/project-material.entity'
 import { Repository } from 'typeorm'
-import { MaterialReportsDTO } from './dto/reports.dto'
+import { MaterialReportsRow } from './types/reports.types'
 
 @Injectable()
 export class ReportsRepository {
@@ -11,22 +11,22 @@ export class ReportsRepository {
     private readonly projectMaterialsRepo: Repository<ProjectMaterial>,
   ) {}
 
-  async getProjectTotal(projectId: string): Promise<number> {
-    const result = await this.projectMaterialsRepo
+  async getProjectTotal(projectId: string): Promise<{ total: string }> {
+    const total = await this.projectMaterialsRepo
       .createQueryBuilder('pm')
       .select('SUM(pm.quantity * pm.unit_price)', 'total')
       .where('pm.project_id = :projectId', { projectId })
       .getRawOne<{ total: string }>()
 
-    return parseFloat(result?.total || '0')
+    return total || { total: '0.00' }
   }
 
   async getMaterialsData(
     projectId: string,
     limit: number,
     offset: number,
-  ): Promise<MaterialReportsDTO[]> {
-    const qb = this.projectMaterialsRepo
+  ): Promise<MaterialReportsRow[]> {
+    return this.projectMaterialsRepo
       .createQueryBuilder('pm')
       .select('m.id', 'id')
       .addSelect('m.name', 'name')
@@ -40,21 +40,8 @@ export class ReportsRepository {
       .where('pm.project_id = :projectId', { projectId })
       .groupBy('m.id')
       .addGroupBy('m.name')
-    qb.limit(limit)
-    qb.offset(offset)
-
-    const results = await qb.getRawMany<{
-      name: string
-      quantity: string
-      percentage: string
-      total: string
-    }>()
-
-    return results.map((r) => ({
-      name: r.name,
-      quantity: parseFloat(r.quantity),
-      total: parseFloat(r.total),
-      percentage: parseFloat(r.percentage),
-    }))
+      .limit(limit)
+      .offset(offset)
+      .getRawMany<MaterialReportsRow>()
   }
 }
