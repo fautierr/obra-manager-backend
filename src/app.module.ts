@@ -17,6 +17,8 @@ import { ProjectMaterialsModule } from './project-materials/project-materials.mo
 import { ReportsModule } from './reports/reports.module'
 import { MaterialCategoriesModule } from './material-categories/material-categories.module'
 import appConfig from './config/app.config'
+import { APP_GUARD } from '@nestjs/core'
+import { AuthGuard } from './auth/guards/auth.guard'
 @Module({
   imports: [
     // Variables de entorno
@@ -55,6 +57,12 @@ import appConfig from './config/app.config'
     ReportsModule,
 
     MaterialCategoriesModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}

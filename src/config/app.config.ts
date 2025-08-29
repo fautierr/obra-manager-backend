@@ -10,4 +10,5 @@ export default () => ({
   },
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   graphqlSchema: process.env.GRAPHQL_SCHEMA,
+  nextAuthSecret: process.env.NEXTAUTH_SECRET,
 })

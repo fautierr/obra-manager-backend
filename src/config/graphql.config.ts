@@ -11,5 +11,12 @@ export const graphqlConfig = (
     configService.get<string>('graphqlSchema', 'src/schema.gql'),
   ),
   playground: false,
-  plugins: [ApolloServerPluginLandingPageLocalDefault()],
+  plugins: [
+    // ApolloServerPluginLandingPageLocalDefault()
+    ApolloServerPluginLandingPageLocalDefault({
+      embed: true,
+      includeCookies: true,
+    }),
+  ],
+  context: ({ req, res }: { req: Request; res: Response }) => ({ req, res }),
 })
