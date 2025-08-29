@@ -23,7 +23,7 @@ async function bootstrap() {
     }),
   )
   app.useGlobalFilters(new GqlExceptionFilter())
-
-  await app.listen(configService.get<number>('port') || 4000)
+  const port = configService.get<number>('port') || 4000
+  await app.listen(port, '0.0.0.0')
 }
 void bootstrap()
