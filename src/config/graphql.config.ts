@@ -11,6 +11,7 @@ export const graphqlConfig = (
     configService.get<string>('graphqlSchema', 'src/schema.gql'),
   ),
   playground: false,
+  introspection: true,
   plugins: [
     // ApolloServerPluginLandingPageLocalDefault()
     ApolloServerPluginLandingPageLocalDefault({
