@@ -38,6 +38,7 @@ export class AuthGuard implements CanActivate {
     }>()
 
     const req = gqlCtx.req
+    console.log('🔥 AuthGuard - cookies recibidas:', req.cookies)
 
     if (!req || !req.cookies) {
       throw new UnauthorizedException('No request or cookies found')
@@ -49,6 +50,12 @@ export class AuthGuard implements CanActivate {
         : 'authjs.session-token'
 
     const token = req.cookies[cookieName]
+    console.log(
+      '🔥 AuthGuard - cookie que se usará:',
+      cookieName,
+      'valor:',
+      token,
+    )
     if (!token) {
       throw new UnauthorizedException('No session token found')
     }
@@ -64,6 +71,7 @@ export class AuthGuard implements CanActivate {
       }>('@auth/core/jwt')
 
       const secret = this.configService.get<string>('nextAuthSecret')
+      console.log('🔥 AuthGuard - nextAuthSecret:', secret)
       if (!secret) {
         throw new UnauthorizedException('nextAuthSecret not configured')
       }
@@ -73,6 +81,7 @@ export class AuthGuard implements CanActivate {
         secret,
         salt: cookieName,
       })
+      console.log('🔥 AuthGuard - token decodificado:', decoded)
 
       if (!decoded) {
         throw new UnauthorizedException('Invalid session')
